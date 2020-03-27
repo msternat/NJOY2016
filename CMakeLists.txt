@@ -1,9 +1,7 @@
 
 cmake_minimum_required( VERSION 3.2 ) 
-set( CMAKE_CONFIGURATION_TYPES "Debug;Release" CACHE STRING "Supported configuration types" FORCE )
         
 project( njoy LANGUAGES Fortran )
-get_directory_property( is_subproject PARENT_DIRECTORY )
 include( CMakeDependentOption REQUIRED )
 
 set( njoy_GNU_minimum_version 5.1 )
@@ -101,36 +99,7 @@ endif()
 list( INSERT 0 CMAKE_INSTALL_RPATH "${rpath_prefix}/../lib" )
 set( CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE )
 
-if ( NOT GIT_EXECUTABLE )
-    find_package( Git )
-    if ( NOT GIT_FOUND )
-        message( FATAL_ERROR "git installation was not found." )
-    endif()
-endif()
-
-execute_process(
-    COMMAND ${GIT_EXECUTABLE} rev-parse --abbrev-ref HEAD
-    WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
-    OUTPUT_VARIABLE GIT_BRANCH
-    OUTPUT_STRIP_TRAILING_WHITESPACE
-)
-execute_process(
-    COMMAND ${GIT_EXECUTABLE} rev-parse HEAD
-    WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
-    OUTPUT_VARIABLE GIT_HASH
-    OUTPUT_STRIP_TRAILING_WHITESPACE
-) 
-
-message( STATUS "" )
-message( STATUS "-----------------------------------------------------------" )
-message( STATUS "" )
-message( STATUS "njoy" )
-message( STATUS "Git current branch: ${GIT_BRANCH}" )
-message( STATUS "Git commit hash: ${GIT_HASH}" )
-message( STATUS "" )
-message( STATUS "-----------------------------------------------------------" )
-
-add_library( njoy ${njoy_library_linkage} 
+add_library( NJOY2016 ${njoy_library_linkage} 
              "${CMAKE_CURRENT_SOURCE_DIR}/src/acecm.f90"
              "${CMAKE_CURRENT_SOURCE_DIR}/src/acedo.f90"
              "${CMAKE_CURRENT_SOURCE_DIR}/src/acefc.f90"
@@ -171,11 +140,11 @@ add_library( njoy ${njoy_library_linkage}
              "${CMAKE_CURRENT_SOURCE_DIR}/src/viewr.f90"
              "${CMAKE_CURRENT_SOURCE_DIR}/src/wimsr.f90" )
 
-target_include_directories( njoy PUBLIC "${CMAKE_Fortran_MODULE_DIRECTORY}" )
+target_include_directories( NJOY2016 PUBLIC "${CMAKE_Fortran_MODULE_DIRECTORY}" )
 
 set( PREFIX njoy_${CMAKE_Fortran_COMPILER_ID}_${CMAKE_SYSTEM_NAME} )
 
-target_compile_options( njoy PRIVATE 
+target_compile_options( NJOY2016 PRIVATE 
 ${${PREFIX}_common_flags}
 $<$<BOOL:${njoy_strict}>:${${PREFIX}_njoy_strict_flags}>
 $<$<BOOL:${static}>:${${PREFIX}_static_flags}>
@@ -192,40 +161,9 @@ $<$<BOOL:${link_time_optimization}>:${${PREFIX}_link_time_optimization_flags}>
 $<$<BOOL:${nonportable_optimization}>:${${PREFIX}_nonportable_optimization_flags}>>
 ${Fortran_appended_flags} ${njoy_appended_flags} )
 
-target_link_libraries( njoy PUBLIC "$<$<AND:$<CONFIG:RELEASE>,$<BOOL:${link_time_optimization}>>:${${PREFIX}_RELEASE_flags};${${PREFIX}_link_time_optimization_flags}$<$<BOOL:${profile_generate}>:${${PREFIX}_profile_generate_flags};>$<$<BOOL:${profile_use}>:${${PREFIX}_profile_use_flags};>$<$<BOOL:${nonportable_optimization}>:${${PREFIX}_nonportable_optimization_flags};>>$<$<CONFIG:DEBUG>:$<$<BOOL:${coverage}>:${${PREFIX}_coverage_flags};>>$<$<BOOL:Fortran_appended_flags>:${Fortran_appended_flags};>$<$<BOOL:njoy_appended_flags>:${njoy_appended_flags};>" )
+target_link_libraries( NJOY2016 PUBLIC "$<$<AND:$<CONFIG:RELEASE>,$<BOOL:${link_time_optimization}>>:${${PREFIX}_RELEASE_flags};${${PREFIX}_link_time_optimization_flags}$<$<BOOL:${profile_generate}>:${${PREFIX}_profile_generate_flags};>$<$<BOOL:${profile_use}>:${${PREFIX}_profile_use_flags};>$<$<BOOL:${nonportable_optimization}>:${${PREFIX}_nonportable_optimization_flags};>>$<$<CONFIG:DEBUG>:$<$<BOOL:${coverage}>:${${PREFIX}_coverage_flags};>>$<$<BOOL:Fortran_appended_flags>:${Fortran_appended_flags};>$<$<BOOL:njoy_appended_flags>:${njoy_appended_flags};>" )
 
-if ( NOT is_subproject )
-    add_executable( njoy_executable src/main.f90 )
-    set_target_properties( njoy_executable PROPERTIES OUTPUT_NAME njoy )
-    target_compile_options( njoy_executable PRIVATE 
-    ${${PREFIX}_common_flags}
-    $<$<BOOL:${njoy_strict}>:${${PREFIX}_njoy_strict_flags}>
-    $<$<BOOL:${static}>:${${PREFIX}_static_flags}>
-    $<$<BOOL:${is_subproject}>:${${PREFIX}_subproject_flags}>
-    $<$<NOT:$<BOOL:${is_subproject}>>:${${PREFIX}_base_project_flags}>
-    $<$<CONFIG:DEBUG>:
-    ${${PREFIX}_DEBUG_flags} 
-    $<$<BOOL:${coverage}>:${${PREFIX}_coverage_flags}>>
-    $<$<CONFIG:RELEASE>:
-    ${${PREFIX}_RELEASE_flags} 
-    $<$<BOOL:${profile_generate}>:${${PREFIX}_profile_generate_flags}> 
-    $<$<BOOL:${profile_use}>:${${PREFIX}_profile_use_flags}> 
-    $<$<BOOL:${link_time_optimization}>:${${PREFIX}_link_time_optimization_flags}> 
-    $<$<BOOL:${nonportable_optimization}>:${${PREFIX}_nonportable_optimization_flags}>>
-    ${Fortran_appended_flags} ${njoy_appended_flags} )
-    target_link_libraries( njoy_executable PUBLIC njoy )
-endif()
-
-if( NOT is_subproject )
-    enable_testing() 
-    add_subdirectory( tests )
-endif()
-
-set( installation_targets njoy )
-if ( NOT is_subproject )
-    list( APPEND installation_targets njoy_executable )
-endif()
-
+set( installation_targets NJOY2016 )
 install( TARGETS ${installation_targets} 
          RUNTIME DESTINATION bin
          LIBRARY DESTINATION lib
