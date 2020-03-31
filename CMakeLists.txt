@@ -1,7 +1,9 @@
 
 cmake_minimum_required( VERSION 3.2 ) 
+set( CMAKE_CONFIGURATION_TYPES "Debug;Release" CACHE STRING "Supported configuration types" FORCE )
         
-project( njoy LANGUAGES Fortran )
+project( NJOY2016 LANGUAGES Fortran )
+get_directory_property( is_subproject PARENT_DIRECTORY )
 include( CMakeDependentOption REQUIRED )
 
 set( njoy_GNU_minimum_version 5.1 )
@@ -164,6 +166,7 @@ ${Fortran_appended_flags} ${njoy_appended_flags} )
 target_link_libraries( NJOY2016 PUBLIC "$<$<AND:$<CONFIG:RELEASE>,$<BOOL:${link_time_optimization}>>:${${PREFIX}_RELEASE_flags};${${PREFIX}_link_time_optimization_flags}$<$<BOOL:${profile_generate}>:${${PREFIX}_profile_generate_flags};>$<$<BOOL:${profile_use}>:${${PREFIX}_profile_use_flags};>$<$<BOOL:${nonportable_optimization}>:${${PREFIX}_nonportable_optimization_flags};>>$<$<CONFIG:DEBUG>:$<$<BOOL:${coverage}>:${${PREFIX}_coverage_flags};>>$<$<BOOL:Fortran_appended_flags>:${Fortran_appended_flags};>$<$<BOOL:njoy_appended_flags>:${njoy_appended_flags};>" )
 
 set( installation_targets NJOY2016 )
+
 install( TARGETS ${installation_targets} 
          RUNTIME DESTINATION bin
          LIBRARY DESTINATION lib
