@@ -229,8 +229,8 @@ contains
    real(kr),parameter::one=1.e0_kr
    real(kr),parameter::half=.5e0_kr
    real(kr),parameter::tenth=.1e0_kr
-   real(kr),parameter::tol1=0.0002e0_kr
-   real(kr),parameter::tol2=0.002e0_kr
+   real(kr),parameter::tol1=0.001e0_kr
+   real(kr),parameter::tol2=0.01e0_kr
    real(kr),parameter::pmin=1.e-10_kr
    real(kr),parameter::zero=0
 
@@ -599,4 +599,3 @@ contains
    end function fi2
 
 end module acecm
-
